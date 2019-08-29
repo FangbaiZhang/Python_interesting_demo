@@ -25,27 +25,31 @@ class Address():
     # 原始图片提取经纬度信息
     def get_img_exif(self):
         # 导入打开图片，获取原始数据
-        img_exif = exifread.process_file(open(self.img_path, 'rb'))
+        with open(self.img_path, 'rb') as f:
+            img_exif = exifread.process_file(f)
 
         # 原图才能读取到属性，进行判断
         if img_exif:
-            # 经度数
-            self.longitude_gps = img_exif['GPS GPSLongitude']
-            # E,W 东西经方向
-            self.longitude_direction = img_exif['GPS GPSLongitudeRef']
-            # 纬度数
-            self.latitude_gps = img_exif['GPS GPSLatitude']
-            # N,S 南北纬方向
-            self.latitude_direction = img_exif['GPS GPSLatitudeRef']
-            # 拍摄时间
-            take_time = img_exif['EXIF DateTimeOriginal']
+            try:
+                # 经度数
+                self.longitude_gps = img_exif['GPS GPSLongitude']
+                # E,W 东西经方向
+                self.longitude_direction = img_exif['GPS GPSLongitudeRef']
+                # 纬度数
+                self.latitude_gps = img_exif['GPS GPSLatitude']
+                # N,S 南北纬方向
+                self.latitude_direction = img_exif['GPS GPSLatitudeRef']
+                # 拍摄时间
+                take_time = img_exif['EXIF DateTimeOriginal']
 
-            is_lie = self.time_is_today(take_time)
-            if is_lie:
-                print('很遗憾的通知你，你女朋友发的照片不是今天所拍！！！')
+                is_lie = self.time_is_today(take_time)
+                if is_lie:
+                    print('很遗憾的通知你，你女朋友发的照片不是今天所拍！！！')
+            except:
+                print('图片中没有GPS信息')
 
         else:
-            print('图片不是原图或图片中没有GPS信息')
+            print('图片不是原图')
             return
 
 
@@ -57,19 +61,25 @@ class Address():
 
         # 原始图片获取的坐标：[103, 45, 54931/1000] <class 'exifread.classes.IfdTag'>
         # 转换后坐标：103.765259, 29.206260
-        lng = self.format_data(self.longitude_gps)
-        lat = self.format_data(self.latitude_gps)
+        try:
+            lng = self.format_data(self.longitude_gps)
+            lat = self.format_data(self.latitude_gps)
 
-        # 经纬度信息完整才进行转换
-        if lng and lat:
-            # 坐标转换为火星系坐标
-            tr = transfer.Transfer()
-            location = tr.wg84_to_gcj02(lng, lat)
-            gps_address =  f'{location[0]}, {location[1]}'
-            return gps_address # (103.76745380953696,29.20330918425425)
-        else:
-            print(f'图片的数据属性缺失')
-            return
+            # 经纬度信息完整才进行转换
+            if lng and lat:
+                # 坐标转换为火星系坐标
+                tr = transfer.Transfer()
+                location = tr.wg84_to_gcj02(lng, lat)
+                gps_address =  f'{location[0]}, {location[1]}'
+                return gps_address # (103.76745380953696,29.20330918425425)
+            else:
+                print(f'图片的数据属性缺失')
+                return ''
+
+        # 上面已经打印过没有gps数据，此处跳过
+        except:
+            pass
+
 
     # 判断拍摄时间是否在今天
     def time_is_today(self, take_time):
