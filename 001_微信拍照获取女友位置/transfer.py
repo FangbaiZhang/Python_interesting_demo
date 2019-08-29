@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-# /**
 #  * 各地图API坐标系统比较与转换;
-#  * WGS84坐标系：即地球坐标系，国际上通用的坐标系。设备一般包含GPS芯片或者北斗芯片获取的经纬度为WGS84地理坐标系,
+#  * WGS84坐标系：即地球坐标系，国际上通用的坐标系。
+#  * 设备一般包含GPS芯片或者北斗芯片获取的经纬度为WGS84地理坐标系,
 #  * 谷歌地图采用的是WGS84地理坐标系（中国范围除外）;
-#  * GCJ02坐标系：即火星坐标系，是由中国国家测绘局制订的地理信息系统的坐标系统。由WGS84坐标系经加密后的坐标系。谷歌中国地图和搜搜中国地图采用的是GCJ02地理坐标系；
+#  * GCJ02坐标系：即火星坐标系，是由中国国家测绘局制订的地理信息系统的坐标系统。
+#  * 由WGS84坐标系经加密后的坐标系。谷歌中国地图和搜搜中国地图采用的是GCJ02地理坐标系；
 #  * 3BD09坐标系：即百度坐标系，GCJ02坐标系经加密后的坐标系;
-#  */
+
 import math
 from decimal import *
 
@@ -45,7 +46,7 @@ class Transfer():
         return mgLng,mgLat
 
 
-    #gps坐标转换为gcj02坐标系
+    # gps坐标转换为gcj02坐标系
     def wg84_to_gcj02(self,wg84_lng,wg84_lat):
         dLat=self.transformLat(wg84_lng-105.0,wg84_lat-35.0)
         dLng=self.transformLng(wg84_lng-105.0,wg84_lat-35.0)
@@ -59,7 +60,7 @@ class Transfer():
         gcj02Lng = wg84_lng + dLng
         return gcj02Lng,gcj02Lat
 
-    #gcj02坐标转百度坐标
+    # gcj02坐标转百度坐标
     def gcj02_to_bd09(self,gcj02_lng,gcj02_lat):
         x = gcj02_lng
         y = gcj02_lat
@@ -69,12 +70,12 @@ class Transfer():
         bd09_Lat = z * math.sin(theta) + 0.006
         return bd09_Lng,bd09_Lat
 
-    #wg84坐标转百度坐标
+    # wg84坐标转百度坐标
     def wg84_to_bd09(self,wg84_lng,wg84_lat):
         gcj02lng,gcj02lat=self.wg84_to_gcj02(wg84_lng,wg84_lat)
         return self.gcj02_to_bd09(gcj02lng,gcj02lat)
 
-    #百度坐标转GCJ02坐标
+    # 百度坐标转GCJ02坐标
     def bd09_to_gcj02(self,bd09_lng,bd09_lat):
         x = bd09_lng - 0.0065
         y = bd09_lat - 0.006
@@ -84,15 +85,19 @@ class Transfer():
         gcj02_lat = z * math.sin(theta)
         return gcj02_lng,gcj02_lat
 
-    #GCJ坐标转WG84坐标
+    # GCJ坐标转WG84坐标
     def gcj02_to_wg84(self,gcj02_lng,gcj02_lat):
         mlng,mlat=self.transfrom(gcj02_lng,gcj02_lat)
         wg84_Lng=gcj02_lng*2-mlng
         wg84_Lat=gcj02_lat*2-mlat
         return wg84_Lng,wg84_Lat
 
-    #将百度坐标转WG84坐标
+    # 将百度坐标转WG84坐标
     def bd09_to_wg84(self,bd09_lng,bd09_lat):
         gcj02_lng, gcj02_lat=self.bd09_to_gcj02(bd09_lng,bd09_lat)
         return self.gcj02_to_wg84(gcj02_lng,gcj02_lat)
 
+# 实例
+# tr = Transfer()
+# print(type(float(25.0)))
+# print(tr.wg84_to_gcj02(float(25.0), float(30.0)))
